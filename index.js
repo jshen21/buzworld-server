@@ -31,15 +31,12 @@ app.use(cors());
 
 const newsapi = new NewsAPI('86e7879082d0422fa3170e95a826bb8a');
 
-let sources = 'bloomberg, the-wall-street-journal, finantial-times, business-insider, buzzfeed, financial-post, fortune, the economist'
+let sources = 'bloomberg, the-wall-street-journal, the-new-york-times, finantial-times, business-insider, the-washington-post, usa-today, buzzfeed, financial-post, fortune, the-economist, abc-news, cbs-news, fox-news, cnn, msnbc, nbc-news, news24, newsweek, '
 
 app.get('/', async (req, res, next) => {
     try {
         let response = await newsapi.v2.everything({
             sources,
-            language: 'en',
-            from: '2018-10-10',
-            to: '2018-11-7',
             pageSize: 100
           })
         res.status(200).json(response)      
@@ -50,17 +47,18 @@ app.get('/', async (req, res, next) => {
 
 app.get('/api/search', async (req, res, next) => {
     let q = req.query.q
-    let selectedSources = req.query.sources
+    let selectedSources = req.query.sources || sources
+    // let date = new Date();
     console.log('-----', selectedSources);
     try {
         let response = await newsapi.v2.everything({
             q,
             sources: selectedSources,
             language: 'en',
-            sortBy: 'relevancy',
-            from: '2018-11-6',
-            to: '2018-11-7',
-            pageSize: 100
+            sortBy: 'publishedAt', 
+            // from: '2018-11-6',
+            // to: 'date',
+            pageSize: 100,
           })
         res.status(200).json(response)      
     } catch (err) {

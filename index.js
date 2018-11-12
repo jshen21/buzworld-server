@@ -1,25 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-// const morgan = require('morgan');
 const PORT = process.env.Port || 3000;
-
 const NewsAPI = require('newsapi');
-
+const dotenv = require('dotenv').config()
 
 const app = express();
 
-
 module.exports = app;
-
-
-
-// logging middleware
-// app.use(morgan('dev'));
-
-// static middleware
-// app.use(express.static(path.join(__dirname, '..', 'node_modules')));
-// app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // body parsing middleware
 app.use(bodyParser.json());
@@ -28,15 +16,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
 // 'API' routes
+const newsapi = new NewsAPI(process.env.NEWS_API_KEY);
 
-const newsapi = new NewsAPI('86e7879082d0422fa3170e95a826bb8a');
-
-let sources = 'bloomberg, the-wall-street-journal, the-new-york-times, finantial-times, business-insider, the-washington-post, usa-today, buzzfeed, financial-post, fortune, the-economist, abc-news, cbs-news, fox-news, cnn, msnbc, nbc-news, news24, newsweek, '
+let sources = 'bloomberg, the-wall-street-journal, the-new-york-times, finantial-times, business-insider, the-washington-post, usa-today, buzzfeed, financial-post, fortune, the-economist, abc-news, cbs-news, fox-news, cnn, msnbc, nbc-news, news24, newsweek'
 
 app.get('/', async (req, res, next) => {
     try {
         let response = await newsapi.v2.everything({
             sources,
+            language: 'en',
             pageSize: 100
           })
         res.status(200).json(response)      
@@ -46,18 +34,20 @@ app.get('/', async (req, res, next) => {
 })
 
 app.get('/api/search', async (req, res, next) => {
-    let q = req.query.q
-    let selectedSources = req.query.sources || sources
-    // let date = new Date();
-    console.log('-----', selectedSources);
+    let q = req.query.q;
+    let selectedSources = req.query.sources || sources;
+    let from = req.query.from;
+    let to = req.query.to;
+    console.log('-----', from);
+    console.log('-----', to);
     try {
         let response = await newsapi.v2.everything({
             q,
             sources: selectedSources,
             language: 'en',
             sortBy: 'publishedAt', 
-            // from: '2018-11-6',
-            // to: 'date',
+            from,
+            to,
             pageSize: 100,
           })
         res.status(200).json(response)      
@@ -66,40 +56,6 @@ app.get('/api/search', async (req, res, next) => {
     }
 })
 
-// app.get('/api/search', (req, res, next) => {
-//     newsapi.v2.topHeadlines({
-//         sources: 'bbc-news,the-verge',
-//         q: 'bitcoin',
-//         // category: 'business',
-//         language: 'en',
-//         // country: 'us'
-//       }).then(response => {
-//         console.log(response);
-//         /*
-//           {
-//             status: "ok",
-//             articles: [...]
-//           }
-//         */
-//       });
-// }
-// )
-
-// newsapi.v2.topHeadlines({
-//     sources: 'bbc-news,the-verge',
-//     q: 'bitcoin',
-//     category: 'business',
-//     language: 'en',
-//     country: 'us'
-//   }).then(response => {
-//     console.log(response);
-//     /*
-//       {
-//         status: "ok",
-//         articles: [...]
-//       }
-//     */
-// });
 
 // 404 middleware
 // app.use((req, res, next) =>
@@ -119,5 +75,5 @@ app.get('/api/search', async (req, res, next) => {
 // );
 
 
-// app.listen(PORT, () => console.log(`Listening on port ${PORT}`))
-app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
+
+app.listen(PORT, () => console.log(`App listening on port ${PORT}!`))
